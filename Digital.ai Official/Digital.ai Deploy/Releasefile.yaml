@@ -1,0 +1,614 @@
+# Exported from:        http://host.docker.internal:5516/
+# Release version:      23.1.0-rc.3
+# Date created:         Wed May 17 10:17:30 UTC 2023
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  home: workflow
+spec:
+- template: Tomcat DataSource Setup on SSH Host with Digital.ai Deploy
+  description: "Easily create an application in Digital.ai Deploy that can be used\
+    \ to create a DataSource in a Remote Tomcat Server, including its respective environment\
+    \ and infrastructure setup."
+  scheduledStartDate: 2023-03-23T03:30:00Z
+  dueDate: 2023-03-23T04:30:00Z
+  phases:
+  - phase: Setup Infra and Env
+    tasks:
+    - name: Specify Deploy Server Details
+      type: xlrelease.UserInputTask
+      description: Select the Deploy Server Connection onto which the Tomcat application
+        has to be created. You can create a new connection if you have not created
+        one.
+      owner: admin
+      variables:
+      - deploy-server
+    - name: Specify Environment Name
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - environment-name
+    - name: Create Environment
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Environments/${environment-name}"
+      ciType: udm.Environment
+      jsonDescriptor: "{}"
+    - name: Specify Tomcat Host Parameters
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - host-identifier
+      - sudo-username
+      - os
+      - address
+      - port
+      - ssh-username
+      - ssh-privatekey
+    - name: Configure Remote Host
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Infrastructure/${host-identifier}"
+      ciType: overthere.SshHost
+      jsonDescriptor: |-
+        {
+            "stagingDirectoryPath":"",
+            "sudoUsername":"${sudo-username}",
+            "suUsername":"",
+            "suPassword":"",
+            "os":"${os}",
+            "connectionType":"SUDO",
+            "address":"${address}",
+            "port":"${port}",
+            "username":"${ssh-username}",
+            "password":"",
+            "privateKeyFile":"${ssh-privatekey}",
+            "passphrase":""
+        }
+      addToEnvironment: true
+      envID: "Environments/${environment-name}"
+    - name: Check Remote Host Connection
+      type: deploy.ControlTask
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciId: "Infrastructure/${host-identifier}"
+      taskName: checkConnection
+      numberOfContinueRetrials: 0
+      pollingInterval: 10
+      numberOfPollingTrials: 0
+      displayStepLogs: true
+      connectionRetries: 10
+    - name: Specify Tomcat Server Parameters
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - server-name
+      - tomcat-home
+      - tomcat-start-command
+      - tomcat-stop-command
+      - tomcat-status-command
+      - tomcat-status-exptected-output
+    - name: Configure Tomcat Server
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Infrastructure/${host-identifier}/${server-name}"
+      ciType: tomcat.Server
+      jsonDescriptor: |-
+        {
+            "home":"${tomcat-home}",
+            "startCommand":"${tomcat-start-command}",
+            "stopCommand":"${tomcat-stop-command}",
+            "statusCommand":"${tomcat-status-command}",
+            "statusCommandExpectedOutput":"${tomcat-status-exptected-output}",
+            "startWaitTime":"0",
+            "stopWaitTime":"0",
+            "serverStartupTime":"0",
+            "serverShutdownTime":"0",
+            "tomcatRunningPort":""
+        }
+      addToEnvironment: true
+      envID: "Environments/${environment-name}"
+    - name: Check Tomcat Status
+      type: deploy.ControlTask
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciId: "Infrastructure/${host-identifier}/${server-name}"
+      taskName: status
+      numberOfContinueRetrials: 0
+      pollingInterval: 10
+      numberOfPollingTrials: 0
+      displayStepLogs: true
+      connectionRetries: 10
+    - name: Specify Tomcat Virtual Host Name
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - virtual-host-name
+    - name: Configure Tomcat VirtualHost
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Infrastructure/${host-identifier}/${server-name}/${virtual-host-name}"
+      ciType: tomcat.VirtualHost
+      jsonDescriptor: "{}"
+      addToEnvironment: true
+      envID: "Environments/${environment-name}"
+  - phase: Setup Application
+    tasks:
+    - name: Specify Application Name
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - application-name
+    - name: Setup Application
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Applications/${application-name}"
+      ciType: udm.Application
+      jsonDescriptor: "{}"
+    - name: Specify Package Name
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - package-name
+    - name: Create Deployment Package
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Applications/${application-name}/1.0"
+      ciType: udm.DeploymentPackage
+      jsonDescriptor: "{}"
+    - name: Specify Tomcat Datasource
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - datasource-name
+      - jndi-name
+      - datasource-context
+      - database-driver-class-name
+      - database url
+      - db-username
+      - db-password
+    - name: Create Sample Tomcat DataSourceSpec
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Applications/${application-name}/${package-name}/${datasource-name}"
+      ciType: tomcat.DataSourceSpec
+      jsonDescriptor: |-
+        {
+            "context":"${datasource-context}",
+            "jndiName":"${jndi-name}",
+            "driverClassName":"${database-driver-class-name}",
+            "url":"${database url}",
+            "username":"${db-username}",
+            "password":"${db-password}"
+        }
+    - name: Add Managed Application
+      type: xlrelease.ScriptTask
+      owner: admin
+      script: |-
+        from com.xebialabs.xlrelease.api.v1.views import ManagedApplicationView
+        from com.xebialabs.xlrelease.api.v1.views import ConnectionServerView
+        from java.util import Date
+        from java.text import SimpleDateFormat
+        import datetime
+
+        parsedDate = datetime.datetime.now()
+
+        requestBody = ManagedApplicationView()
+        requestBody.applicationName = "${application-name}"
+        requestBody.managedBy = "Digital.ai Deploy"
+        requestBody.dateCreated = parsedDate
+        requestBody.environmentTag = "${environment-name}"
+        requestBody.applicationReference = "${application-name}"
+
+        connectionServer = ConnectionServerView('${deploy-server}', '', '', '')
+        requestBody.connectionServer = connectionServer
+
+        res = managedApplicationApi.addManagedApplication(requestBody)
+    color: '#3d6c9e'
+  tags:
+  - app-pipeline-templates
+  variables:
+  - type: xlrelease.StringVariable
+    key: environment-name
+    value: tomcat-env
+  - type: xlrelease.StringVariable
+    key: host-identifier
+    value: tomcat-host
+  - type: xlrelease.StringVariable
+    key: address
+    value: 1.2.3.4
+  - type: xlrelease.StringVariable
+    key: os
+    value: UNIX
+  - type: xlrelease.StringVariable
+    key: port
+    value: "22"
+  - type: xlrelease.StringVariable
+    key: ssh-privatekey
+    value: private-key-path
+  - type: xlrelease.StringVariable
+    key: ssh-username
+    value: ssh-username
+  - type: xlrelease.StringVariable
+    key: sudo-username
+    value: sudo-username
+  - type: xlrelease.StringVariable
+    key: application-name
+    value: tomcat-app
+  - type: xlrelease.StringVariable
+    key: package-name
+    value: "1.0"
+  - type: xlrelease.StringVariable
+    key: tomcat-home
+    value: tomcat-home
+  - type: xlrelease.StringVariable
+    key: tomcat-start-command
+    value: systemctl start tomcat
+  - type: xlrelease.StringVariable
+    key: tomcat-status-command
+    value: systemctl status tomcat
+  - type: xlrelease.StringVariable
+    key: tomcat-status-exptected-output
+    value: active (running)
+  - type: xlrelease.StringVariable
+    key: tomcat-stop-command
+    value: systemctl stop tomcat
+  - type: xlrelease.StringVariable
+    key: database url
+    value: database url
+  - type: xlrelease.StringVariable
+    key: database-driver-class-name
+    value: database-driver-class-name
+  - type: xlrelease.StringVariable
+    key: datasource-context
+    value: datasource-context
+  - type: xlrelease.StringVariable
+    key: db-password
+    value: db-password
+  - type: xlrelease.StringVariable
+    key: db-username
+    value: db-username
+  - type: xlrelease.StringVariable
+    key: jndi-name
+    value: jndi-name
+  - type: xlrelease.StringVariable
+    key: server-name
+    value: tomcat-server
+  - type: xlrelease.StringVariable
+    key: virtual-host-name
+    value: virtual-host
+  - type: xlrelease.StringVariable
+    key: datasource-name
+    value: sample-datasource
+  - type: xlrelease.ReferenceVariable
+    key: deploy-server
+    showOnReleaseStart: false
+    label: Deploy Server
+    referencedType: digitalai.DeployServer
+  riskProfile: Default risk profile
+- template: Websphere JaasAlias setup with Digital.ai Deploy
+  description: "Easily create an application in Digital.ai Deploy that can be used\
+    \ to create a JaasAlias in a remote Websphere Server, including its respective\
+    \ environment and infrastructure setup."
+  scheduledStartDate: 2023-02-14T03:30:00Z
+  dueDate: 2023-02-14T04:30:00Z
+  phases:
+  - phase: Setup Infra and Env
+    tasks:
+    - name: Specify Deploy Server Details
+      type: xlrelease.UserInputTask
+      description: Select the Deploy Server Connection onto which the Websphere application
+        has to be created. You can create a new connection if you have not created
+        one.
+      owner: admin
+      variables:
+      - deploy-server
+    - name: Specify Environment Name
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - environment-name
+    - name: Create Environment
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Environments/${environment-name}"
+      ciType: udm.Environment
+      jsonDescriptor: "{}"
+    - name: Specify WAS Host Parameters
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - host-identifier
+      - sudo-username
+      - os
+      - connection-type
+      - address
+      - ssh-username
+      - ssh-password
+    - name: Configure Remote Host
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Infrastructure/${host-identifier}"
+      ciType: overthere.SshHost
+      jsonDescriptor: |-
+        {
+            "stagingDirectoryPath":"",
+            "sudoUsername":"${sudo-username}",
+            "suUsername":"",
+            "suPassword":"",
+            "os":"${os}",
+            "connectionType":"${connection-type}",
+            "address":"${address}",
+            "port":22,
+            "username":"${ssh-username}",
+            "password":"${ssh-password}",
+            "privateKeyFile":"",
+            "passphrase":""
+        }
+    - name: Check Remote Host Connection
+      type: deploy.ControlTask
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciId: "Infrastructure/${host-identifier}"
+      taskName: checkConnection
+      numberOfContinueRetrials: 0
+      pollingInterval: 10
+      numberOfPollingTrials: 0
+      displayStepLogs: true
+      connectionRetries: 10
+    - name: Specify WAS Deployment Manager Parameters
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - cell-name
+      - was-home
+      - was-username
+      - was-password
+    - name: Configure Websphere Deployment Manager
+      type: deploy.CreateCI
+      owner: admin
+      variableMapping:
+        server: "${deploy-server}"
+      capabilities:
+      - remote
+      ciID: "Infrastructure/${host-identifier}/${cell-name}"
+      ciType: was.DeploymentManager
+      jsonDescriptor: |-
+        {
+            "wasHome": "${was-home}",
+            "username": "${was-username}",
+            "password": "${was-password}",
+            "version": "WAS_90"
+        }
+      addToEnvironment: true
+      envID: "Environments/${environment-name}"
+    - name: Specify WAS Node Agent Parameters
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - node-name
+    - name: Configure Websphere Node Agent
+      type: deploy.CreateCI
+      capabilities:
+      - remote
+      ciID: "Infrastructure/${host-identifier}/${cell-name}/${node-name}"
+      ciType: was.NodeAgent
+      jsonDescriptor: "{}"
+      addToEnvironment: true
+      envID: "Environments/${environment-name}"
+    - name: Specify WAS Server Parameters
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - server-name
+    - name: Configure Websphere Server
+      type: deploy.CreateCI
+      capabilities:
+      - remote
+      ciID: "Infrastructure/${host-identifier}/${cell-name}/${node-name}/${server-name}"
+      ciType: was.ManagedServer
+      jsonDescriptor: "{}"
+      addToEnvironment: true
+      envID: "Environments/${environment-name}"
+    color: '#3d6c9e'
+  - phase: Setup Application
+    tasks:
+    - name: Specify WAS Application Name
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - application-name
+    - name: Create Application
+      type: deploy.CreateCI
+      owner: admin
+      capabilities:
+      - remote
+      ciID: "Applications/${application-name}"
+      ciType: udm.Application
+      jsonDescriptor: "{}"
+    - name: Specify Deployment Package
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - package-name
+    - name: Create Deployment Package
+      type: deploy.CreateCI
+      owner: admin
+      capabilities:
+      - remote
+      ciID: "Applications/${application-name}/${package-name}"
+      ciType: udm.DeploymentPackage
+      jsonDescriptor: "{}"
+    - name: Specify WAS JaasAliasSpec Parameters
+      type: xlrelease.UserInputTask
+      description: Please enter the required information below.
+      owner: admin
+      variables:
+      - jaas-password
+      - jaas-username
+    - name: Create Sample WAS JaasAliasSpec
+      type: deploy.CreateCI
+      owner: admin
+      capabilities:
+      - remote
+      ciID: "Applications/${application-name}/${package-name}/${jaas-alias-name}"
+      ciType: was.JaasAliasSpec
+      jsonDescriptor: |-
+        {
+        "username": "${jaas-username}",
+        "password": "${jaas-password}"
+        }
+    - name: Add Managed Application
+      type: xlrelease.ScriptTask
+      owner: admin
+      script: |-
+        from com.xebialabs.xlrelease.api.v1.views import ManagedApplicationView
+        from com.xebialabs.xlrelease.api.v1.views import ConnectionServerView
+        from java.util import Date
+        from java.text import SimpleDateFormat
+        import datetime
+
+        parsedDate = datetime.datetime.now()
+
+        requestBody = ManagedApplicationView()
+        requestBody.applicationName = "${application-name}"
+        requestBody.managedBy = "Digital.ai Deploy"
+        requestBody.dateCreated = parsedDate
+        requestBody.environmentTag = "${environment-name}"
+        requestBody.applicationReference = "${application-name}"
+
+        connectionServer = ConnectionServerView('${deploy-server}', '', '', '')
+        requestBody.connectionServer = connectionServer
+
+        res = managedApplicationApi.addManagedApplication(requestBody)
+    color: '#3d6c9e'
+  tags:
+  - app-pipeline-templates
+  variables:
+  - type: xlrelease.StringVariable
+    key: environment-name
+    value: was-env
+  - type: xlrelease.StringVariable
+    key: host-identifier
+    value: was-host
+  - type: xlrelease.StringVariable
+    key: os
+    value: UNIX
+  - type: xlrelease.StringVariable
+    key: address
+    value: 1.2.3.4
+  - type: xlrelease.StringVariable
+    key: connection-type
+    value: SUDO
+  - type: xlrelease.StringVariable
+    key: ssh-username
+    value: ssh-username
+  - type: xlrelease.StringVariable
+    key: ssh-password
+    value: ssh-password
+  - type: xlrelease.StringVariable
+    key: sudo-username
+    value: sudo-username
+  - type: xlrelease.StringVariable
+    key: application-name
+    value: was-application
+  - type: xlrelease.StringVariable
+    key: package-name
+    value: "1.0"
+  - type: xlrelease.StringVariable
+    key: cell-name
+    value: was-cell-1
+  - type: xlrelease.StringVariable
+    key: was-home
+    value: /opt/IBM/WebSphere/AppServer-1/profiles/Dmgr01
+  - type: xlrelease.StringVariable
+    key: was-password
+    value: admin
+  - type: xlrelease.StringVariable
+    key: was-username
+    value: admin
+  - type: xlrelease.StringVariable
+    key: was-version
+    value: WAS_90
+  - type: xlrelease.StringVariable
+    key: node-name
+    value: was-node-1
+  - type: xlrelease.StringVariable
+    key: server-name
+    value: was-server-1
+  - type: xlrelease.StringVariable
+    key: jaas-password
+    value: admin
+  - type: xlrelease.StringVariable
+    key: jaas-username
+    value: admin
+  - type: xlrelease.ReferenceVariable
+    key: deploy-server
+    showOnReleaseStart: false
+    label: Deploy Server
+    referencedType: digitalai.DeployServer
+  - type: xlrelease.StringVariable
+    key: jaas-alias-name
+    value: Sample JAAS Alias
+  riskProfile: Default risk profile
