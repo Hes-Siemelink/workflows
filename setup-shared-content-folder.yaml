@@ -1,0 +1,55 @@
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  home: Shared Content
+spec:
+- directory: Digital.ai Official
+  children:
+  - name: Digital.ai Official Repository
+    type: git.Repository
+    url: https://github.com/Hes-Siemelink/workflows
+  - directory: ArgoCD
+    children:
+    - type: xlrelease.FolderVersioningSettings
+      gitConnection: Digital.ai Official Repository
+      scmPath: ArgoCD
+      branch: main
+  - directory: AWS Lambda
+    children:
+    - type: xlrelease.FolderVersioningSettings
+      gitConnection: Digital.ai Official Repository
+      scmPath: AWS-Lambda
+      branch: main
+  - directory: Digital.ai Deploy
+    children:
+    - type: xlrelease.FolderVersioningSettings
+      gitConnection: Digital.ai Official Repository
+      scmPath: Digital.ai-Deploy
+      branch: main
+
+---
+apiVersion: xl-release/v1
+kind: Permissions
+metadata:
+  home: Shared Content
+spec:
+- directory: Digital.ai Official
+  teams:
+  - name: Template Owner
+  - name: Folder Owner
+    users:
+    - admin
+    permissions:
+    - delivery_pattern#view
+    - template#view
+    - folder#view
+    - folder#view_versions
+    - folder#apply_changes
+    - dashboard#view
+  - name: Release Admin
+  - name: Everybody
+    permissions:
+    - delivery_pattern#view
+    - template#view
+    - folder#view
+    - dashboard#view
