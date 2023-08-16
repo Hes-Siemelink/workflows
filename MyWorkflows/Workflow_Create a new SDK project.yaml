@@ -1,6 +1,6 @@
 # Exported from:        http://host.docker.internal:5516/
 # Release version:      23.3.0-beta.5
-# Date created:         Wed Aug 16 15:19:52 UTC 2023
+# Date created:         Wed Aug 16 18:03:58 UTC 2023
 
 ---
 apiVersion: xl-release/v1
@@ -12,6 +12,7 @@ spec:
   description: Helps you set up a new Digital.ai Release Integration project with
     the SDK
   scheduledStartDate: 2023-08-16T15:00:00Z
+  dueDate: 2023-08-16T16:00:00Z
   phases:
   - phase: Steps
     tasks:
@@ -20,6 +21,7 @@ spec:
       variables:
       - target
       - publisher
+      - github_token
     - name: Create project from template
       type: xlrelease.Task
       description: |-
@@ -32,6 +34,24 @@ spec:
         Use the following naming project name for your integration project, that follows the naming convention for Digital.ai Release integration plugins:
 
             ${publisher}-release-${target}-integration
+    - name: Create project from template (copy)
+      type: githubhes.CreateRepoFromTemplate
+      description: |-
+        Go to the  [release-integration-template-python](https://github.com/digital-ai/release-integration-template-python) template repository on GitHub.
+
+        On the main page of this repository, click **Use this template** button, and select **Create new repository**. This will create a duplicate of this project to start developing your own container-based integration.
+
+        **Naming conventions**
+
+        Use the following naming project name for your integration project, that follows the naming convention for Digital.ai Release integration plugins:
+
+            ${publisher}-release-${target}-integration
+      variableMapping:
+        token: "${github_token}"
+      capabilities:
+      - remote
+      repoName: "${publisher}-release-${target}-integration"
+      template: digital-ai/release-integration-template-python
     - name: Adapt files
       type: xlrelease.Task
       description: |-
@@ -80,4 +100,9 @@ spec:
     label: Integration target
     description: "The technology this integration will interact with. For example:\
       \ 'aws'."
+  - type: xlrelease.PasswordStringVariable
+    key: github_token
+    showOnReleaseStart: false
+    label: GitHub token
+    description: API access token for GitHub that allows creation of repositories
   riskProfile: Default risk profile
