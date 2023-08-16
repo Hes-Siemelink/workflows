@@ -1,6 +1,6 @@
 # Exported from:        http://host.docker.internal:5516/
 # Release version:      23.3.0-beta.5
-# Date created:         Wed Aug 16 15:05:20 UTC 2023
+# Date created:         Wed Aug 16 15:19:52 UTC 2023
 
 ---
 apiVersion: xl-release/v1
@@ -15,6 +15,11 @@ spec:
   phases:
   - phase: Steps
     tasks:
+    - name: Project details
+      type: xlrelease.UserInputTask
+      variables:
+      - target
+      - publisher
     - name: Create project from template
       type: xlrelease.Task
       description: |-
@@ -24,15 +29,9 @@ spec:
 
         **Naming conventions**
 
-        Use the following naming convention for developing Digital.ai Release integration plugins:
+        Use the following naming project name for your integration project, that follows the naming convention for Digital.ai Release integration plugins:
 
-            [publisher]-release-[target]-integration
-
-        Where publisher would be the name of your company.
-
-        For example:
-
-            acme-release-example-integration
+            ${publisher}-release-${target}-integration
     - name: Adapt files
       type: xlrelease.Task
       description: |-
@@ -41,13 +40,13 @@ spec:
         In the new project, update `project.properties` with the name of the integration plugin
 
         ```commandline
-        cd acme-release-example-integration
+        cd ${publisher}-release-${target}-integration
         ```
 
         Change the following line in `project.properties`:
 
         ```
-        PLUGIN=acme-release-example-integration
+        PLUGIN=${publisher}-release-${target}-integration
         ...
         ```
 
@@ -62,10 +61,23 @@ spec:
             boto3 == 1.26.118
     - name: Next steps
       type: xlrelease.Task
-      description: Follow the instructions in the README of the new project to get
-        started.
+      description: "Follow the instructions in the README of the`${publisher}-release-${target}-integration`\
+        \ project to get started."
     color: '#3d6c9e'
   kind: WORKFLOW
   categories:
   - Cloud & Container
+  variables:
+  - type: xlrelease.StringVariable
+    key: publisher
+    showOnReleaseStart: false
+    label: Publisher
+    description: "The name of your organization, for example 'acme'. User lowercase\
+      \ and no spaces."
+  - type: xlrelease.StringVariable
+    key: target
+    showOnReleaseStart: false
+    label: Integration target
+    description: "The technology this integration will interact with. For example:\
+      \ 'aws'."
   riskProfile: Default risk profile
