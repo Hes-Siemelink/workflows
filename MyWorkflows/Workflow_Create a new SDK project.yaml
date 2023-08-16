@@ -1,0 +1,71 @@
+# Exported from:        http://host.docker.internal:5516/
+# Release version:      23.3.0-beta.5
+# Date created:         Wed Aug 16 15:05:20 UTC 2023
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  home: My Workflows
+spec:
+- template: Create a new SDK project
+  description: Helps you set up a new Digital.ai Release Integration project with
+    the SDK
+  scheduledStartDate: 2023-08-16T15:00:00Z
+  phases:
+  - phase: Steps
+    tasks:
+    - name: Create project from template
+      type: xlrelease.Task
+      description: |-
+        Go to the  [release-integration-template-python](https://github.com/digital-ai/release-integration-template-python) template repository on GitHub.
+
+        On the main page of this repository, click **Use this template** button, and select **Create new repository**. This will create a duplicate of this project to start developing your own container-based integration.
+
+        **Naming conventions**
+
+        Use the following naming convention for developing Digital.ai Release integration plugins:
+
+            [publisher]-release-[target]-integration
+
+        Where publisher would be the name of your company.
+
+        For example:
+
+            acme-release-example-integration
+    - name: Adapt files
+      type: xlrelease.Task
+      description: |-
+        ### Project name
+
+        In the new project, update `project.properties` with the name of the integration plugin
+
+        ```commandline
+        cd acme-release-example-integration
+        ```
+
+        Change the following line in `project.properties`:
+
+        ```
+        PLUGIN=acme-release-example-integration
+        ...
+        ```
+
+        ### Project dependencies
+
+        Libraries are defined in `requirements.txt`.
+
+        Hunt for the external libraries that you need on [pypi.org](https://pypi.org).
+
+        For example, to integrate with AWS form Python, the recommended library is Boto3. Add it to the requirements with the following line:
+
+            boto3 == 1.26.118
+    - name: Next steps
+      type: xlrelease.Task
+      description: Follow the instructions in the README of the new project to get
+        started.
+    color: '#3d6c9e'
+  kind: WORKFLOW
+  categories:
+  - Cloud & Container
+  riskProfile: Default risk profile
