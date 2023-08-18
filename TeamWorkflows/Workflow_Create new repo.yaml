@@ -1,6 +1,6 @@
 # Exported from:        http://host.docker.internal:5516/
 # Release version:      23.3.0-beta.5
-# Date created:         Fri Aug 18 15:36:29 UTC 2023
+# Date created:         Fri Aug 18 18:25:52 UTC 2023
 
 ---
 apiVersion: xl-release/v1
@@ -10,6 +10,7 @@ metadata:
 spec:
 - template: Create new repo
   scheduledStartDate: 2023-08-17T15:00:00Z
+  dueDate: 2023-08-17T16:00:00Z
   phases:
   - phase: Steps
     tasks:
@@ -76,6 +77,12 @@ spec:
         1. Rename other files/folders as needed and configure their content
         1. Delete this `README` and rename `README_project.md` to `README.md`
       message: Updated README with project info
+    - name: Closing message
+      type: xlrelease.Task
+      description: |-
+        The new repository **[${repo}](https://github.com/${repo})** has been created.
+
+        Check it out!
     color: '#3d6c9e'
   kind: WORKFLOW
   categories:
