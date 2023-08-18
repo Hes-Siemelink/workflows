@@ -1,0 +1,30 @@
+# Exported from:        http://host.docker.internal:5516/
+# Release version:      23.3.0-beta.5
+# Date created:         Fri Aug 18 13:38:23 UTC 2023
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  home: Team Workflows
+spec:
+- template: Create new repo
+  scheduledStartDate: 2023-08-17T15:00:00Z
+  phases:
+  - phase: Steps
+    tasks:
+    - name: Create repo from template
+      type: xlrelease.Task
+      description: |-
+        Go to the [something] project on GitHub and select **New repo from template**
+
+        Use the naming convention: `[PRODUCT]-[NAME]-[TYPE]`
+    - name: Customize project
+      type: xlrelease.Task
+      description: "In the Readme, mention product type and language it is written\
+        \ in."
+    color: '#3d6c9e'
+  kind: WORKFLOW
+  categories:
+  - Application Life Cycle Management
+  riskProfile: Default risk profile
