@@ -1,6 +1,6 @@
 # Exported from:        http://host.docker.internal:5516/
 # Release version:      23.3.0-beta.5
-# Date created:         Fri Aug 18 14:27:28 UTC 2023
+# Date created:         Fri Aug 18 14:47:51 UTC 2023
 
 ---
 apiVersion: xl-release/v1
@@ -25,13 +25,13 @@ spec:
     - name: Create repo from template
       type: xlrelease.Task
       description: |-
-        Go to the [something] project on GitHub and select **New repo from template**
+        Go to the [python-template](https://github.com/Hes-Siemelink/python-template) template repository  on GitHub and select **New repo from template**
 
         Use the naming convention: `${product}-${module}-${type}`
     - name: Customize project
       type: xlrelease.Task
-      description: "In the Readme, mention the **team** that is responsible for the\
-        \ project."
+      description: "In the Readme, replace `PROJECT_NAME` and `TEAM_NAME` with the\
+        \ actual values."
     color: '#3d6c9e'
   kind: WORKFLOW
   categories:
