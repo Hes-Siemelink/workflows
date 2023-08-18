@@ -1,6 +1,6 @@
 # Exported from:        http://host.docker.internal:5516/
 # Release version:      23.3.0-beta.5
-# Date created:         Fri Aug 18 13:38:23 UTC 2023
+# Date created:         Fri Aug 18 14:27:28 UTC 2023
 
 ---
 apiVersion: xl-release/v1
@@ -13,18 +13,68 @@ spec:
   phases:
   - phase: Steps
     tasks:
+    - name: Project properties
+      type: xlrelease.UserInputTask
+      description: Enter the properties of the new project
+      variables:
+      - product
+      - module
+      - type
+      - language
+      - team
     - name: Create repo from template
       type: xlrelease.Task
       description: |-
         Go to the [something] project on GitHub and select **New repo from template**
 
-        Use the naming convention: `[PRODUCT]-[NAME]-[TYPE]`
+        Use the naming convention: `${product}-${module}-${type}`
     - name: Customize project
       type: xlrelease.Task
-      description: "In the Readme, mention product type and language it is written\
-        \ in."
+      description: "In the Readme, mention the **team** that is responsible for the\
+        \ project."
     color: '#3d6c9e'
   kind: WORKFLOW
   categories:
   - Application Life Cycle Management
+  variables:
+  - type: xlrelease.StringVariable
+    key: module
+    requiresValue: false
+    showOnReleaseStart: false
+    label: Module
+    description: New module that is created
+  - type: xlrelease.StringVariable
+    key: product
+    showOnReleaseStart: false
+    label: Product
+    description: Main product this repo is for.
+  - type: xlrelease.StringVariable
+    key: language
+    showOnReleaseStart: false
+    label: Language
+    valueProvider:
+      type: xlrelease.ListOfStringValueProviderConfiguration
+      values:
+      - Python
+      - JavaScript
+      - Go
+      - Java
+    value: Python
+  - type: xlrelease.StringVariable
+    key: type
+    showOnReleaseStart: false
+    label: Project type
+    valueProvider:
+      type: xlrelease.ListOfStringValueProviderConfiguration
+      values:
+      - frontend
+      - backend
+      - integration-tests
+      - demo-material
+    value: backend
+  - type: xlrelease.StringVariable
+    key: team
+    showOnReleaseStart: false
+    label: Team name
+    description: The team responsible for the project
   riskProfile: Default risk profile
