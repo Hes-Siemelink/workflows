@@ -1,6 +1,6 @@
 # Exported from:        http://host.docker.internal:5516/
 # Release version:      23.3.0-beta.5
-# Date created:         Fri Aug 18 14:47:51 UTC 2023
+# Date created:         Fri Aug 18 15:36:29 UTC 2023
 
 ---
 apiVersion: xl-release/v1
@@ -23,15 +23,59 @@ spec:
       - language
       - team
     - name: Create repo from template
-      type: xlrelease.Task
+      type: githubhes.CreateRepoFromTemplate
       description: |-
         Go to the [python-template](https://github.com/Hes-Siemelink/python-template) template repository  on GitHub and select **New repo from template**
 
         Use the naming convention: `${product}-${module}-${type}`
+      variableMapping:
+        repository: "${repo}"
+      capabilities:
+      - remote
+      repoName: "${product}-${module}-${type}"
+      template: Hes-Siemelink/python-template
+      token: !value "githubhes_CreateRepoFromTemplate_Create_repo_from_template_token"
     - name: Customize project
-      type: xlrelease.Task
-      description: "In the Readme, replace `PROJECT_NAME` and `TEAM_NAME` with the\
-        \ actual values."
+      type: githubhes.ModifyFile
+      description: "In the Readme of [repository ${repo}](https://github.com/${repo}),\
+        \ replace `PROJECT_NAME` and `TEAM_NAME` with the actual values."
+      capabilities:
+      - remote
+      repoName: "${repo}"
+      token: !value "githubhes_ModifyFile_Customize_project_token"
+      branch: main
+      path: README.md
+      content: |-
+        # ${product}  ${module} (${type})
+
+        Maintained by team ${team}
+
+
+        ## Install
+
+        Click the [Use this template](https://github.com/Justintime50/python-template/generate) button at the top of this project's GitHub page to get started.
+
+        ## Usage
+
+        ### Easy text replacements
+
+        1. Replace all instances of `project_name` with the name of your project
+            * These are the Python snake_case references (eg: `project_name`)
+        1. Replace all instances of `PROJECT_NAME_URL` with the name of your project
+            * These are the references to your project that will appear in URLs and are typically hyphenated (eg: `project-name`)
+        1. Replace all instances of `USERNAME` with the name of the author or owner of the project
+            * These are references typically found in the URL of your project as it appears on GitHub
+
+        ### File configuration
+
+        1. Configure the `setup.py` file
+        1. Configure the `Makefile` targets
+        1. Update the name in the `LICENSE` or swap it out entirely
+        1. Configure the `.github/workflows/build.yml` file
+        1. Update the `CHANGELOG.md` with your own info
+        1. Rename other files/folders as needed and configure their content
+        1. Delete this `README` and rename `README_project.md` to `README.md`
+      message: Updated README with project info
     color: '#3d6c9e'
   kind: WORKFLOW
   categories:
@@ -77,4 +121,8 @@ spec:
     showOnReleaseStart: false
     label: Team name
     description: The team responsible for the project
+  - type: xlrelease.StringVariable
+    key: repo
+    requiresValue: false
+    showOnReleaseStart: false
   riskProfile: Default risk profile
