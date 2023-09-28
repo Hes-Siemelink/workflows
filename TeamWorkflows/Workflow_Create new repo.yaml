@@ -9,8 +9,6 @@ metadata:
   home: Team Workflows
 spec:
 - template: Create new repo
-  scheduledStartDate: 2023-08-17T15:00:00Z
-  dueDate: 2023-08-17T16:00:00Z
   phases:
   - phase: Steps
     tasks:
@@ -132,4 +130,3 @@ spec:
     key: repo
     requiresValue: false
     showOnReleaseStart: false
-  riskProfile: Default risk profile
