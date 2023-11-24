@@ -1,0 +1,25 @@
+# Exported from:        http://host.docker.internal:5516/
+# Release version:      23.3.0
+# Date created:         Fri Nov 24 10:20:55 UTC 2023
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  home: My workflows
+spec:
+- template: Hello world
+  scheduledStartDate: 2023-11-24T08:00:00Z
+  phases:
+  - phase: Workflow tasks
+    tasks:
+    - name: Greeting
+      type: xlrelease.Task
+      description: "Hello, world!"
+  kind: WORKFLOW
+  categories:
+  - Application onboarding
+  disableNotifications: true
+  author: admin
+  allowTargetFolderOverride: false
+  defaultTargetFolder: ./
