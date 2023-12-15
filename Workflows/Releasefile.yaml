@@ -1,0 +1,10 @@
+# Exported from:        http://host.docker.internal:5516/
+# Release version:      23.3.0
+# Date created:         Fri Dec 15 10:44:37 UTC 2023
+
+---
+apiVersion: xl-release/v1
+kind: Import
+spec:
+  imports:
+  - Workflow_Hello World.yaml
