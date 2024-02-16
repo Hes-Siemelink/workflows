@@ -1,0 +1,14 @@
+# Exported from:        http://release-staging.devops.dev.digitalai.cloud/
+# Release version:      24.1.0-beta.5
+# Date created:         Fri Feb 16 11:36:30 GMT 2024
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  home: Users/Hes/Workflows/ArgoCD
+spec:
+- name: Digital.ai Official - Fork
+  type: git.Repository
+  url: https://github.com/Hes-Siemelink/release-content
+  password: !value "git_Repository_Digital_ai_Official___Fork_password"
