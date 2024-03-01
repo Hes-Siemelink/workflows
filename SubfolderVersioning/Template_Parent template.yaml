@@ -1,0 +1,20 @@
+# Exported from:        http://localhost:5516/
+# Release version:      24.1.0-301.113
+# Date created:         Fri Mar 01 10:25:42 GMT 2024
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+spec:
+- template: Parent template
+  scheduledStartDate: 2024-03-01T08:00:00Z
+  dueDate: 2024-03-01T09:00:00Z
+  phases:
+  - phase: New Phase
+    tasks:
+    - name: Hello again
+      type: xlrelease.Task
+  riskProfile: Default risk profile
+  author: admin
