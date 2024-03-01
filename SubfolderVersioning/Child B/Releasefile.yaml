@@ -6,15 +6,15 @@
 apiVersion: xl-release/v1
 kind: Templates
 metadata:
-  path: /
+  path: Child B
 spec:
-- template: Parent template
+- template: Child B template
   scheduledStartDate: 2024-03-01T08:00:00Z
   dueDate: 2024-03-01T09:00:00Z
   phases:
   - phase: New Phase
     tasks:
-    - name: Hello again
+    - name: Hello child
       type: xlrelease.Task
   riskProfile: Default risk profile
   author: admin
