@@ -1,0 +1,100 @@
+# Exported from:        http://release:5516/
+# Release version:      24.3.0
+# Date created:         Fri Feb 07 08:36:24 GMT 2025
+
+---
+apiVersion: xl-release/v1
+kind: Templates
+metadata:
+  path: /
+  home: Test framework
+spec:
+- template: Test Runner for Templates
+  scheduledStartDate: 2025-02-06T08:00:00Z
+  phases:
+  - phase: Setup Test
+    tasks:
+    - name: Create mocks in template
+      type: xlrelease.ScriptTask
+      script: |-
+        from com.xebialabs.xlrelease.api.v1.forms import Variable
+
+
+        # baseTemplate = templateApi.getTemplate(releaseVariables['templateId'])
+        baseTemplate = releaseApi.searchReleasesByTitle(releaseVariables['templateId'])[0]
+        referenceRelease = releaseApi.getRelease(releaseVariables['releaseId'])
+        mockType = releaseVariables['mockType']
+
+        def find_all_tasks(refRel):
+          tasks = []
+          for phase in refRel.phases:
+            for task in phase.tasks:
+              tasks.append(task)
+          return tasks
+
+        def find_task_by_type(all, type, startIndex):
+          for i in range(startIndex, len(all)):
+            if all[i].type.toString() == type:
+              return all[i], i + 1
+
+          raise Exception("Task not found after index %s" % startIndex)
+
+        def create_mock_script(original):
+
+          # mock = original.pythonScript.getOuputProperties().toString()
+
+          # XXX Getting the output variable is hardcoded now, should be a proper lookup
+          return "releaseVariables['taskId'] = '%s'" %original.getProperty('xlDeployTaskId')
+
+        # Reference list of previously run tasks, as a flat list for simpler lookup
+        allTasks = find_all_tasks(referenceRelease)
+        taskIndex = 0
+
+        # Copy variables.
+        # XXX Make this work
+        for variable in releaseApi.getVariables(referenceRelease.id):
+          # print "type: %s; contents: %s" % (type(variable), variable)
+          formVar = Variable(variable.type.toString(), variable.key, variable.getValue(), variable.requiresValue)
+          releaseApi.createVariable(release.id, formVar)
+
+        # Copy template into this release and replace certain tasks with mocks
+        for phase in baseTemplate.phases:
+          print "PHASE" + phase.title
+          addedPhase = phaseApi.addPhase(release.id, phase)
+          for task in phase.tasks:
+
+            if task.type.toString() == mockType:
+              mockTask = taskApi.newTask('xlrelease.ScriptTask')
+              mockTask.title = "MOCK " + task.title
+              original, taskIndex = find_task_by_type(allTasks, mockType, taskIndex)
+              mockTask.script = create_mock_script(original)
+              taskApi.addTask(addedPhase.id, mockTask)
+            else:
+              taskApi.addTask(addedPhase.id, task)
+    - name: OK?
+      type: xlrelease.GateTask
+      owner: admin
+    color: "#667385"
+  variables:
+  - type: xlrelease.StringVariable
+    key: templateId
+    label: Template to test
+    description: Name of the template that will be tested
+    value: Acme-Backend Deploy Pipeline
+  - type: xlrelease.StringVariable
+    key: releaseId
+    label: Reference release
+    description: ID of a completed release that will be used to take the output properties
+      for mock tasks
+    value: Folder1678606aa61840878e5aaa17fdb19cfa/Release907a9e73685f4081a7feffa1b250d420
+  - type: xlrelease.StringVariable
+    key: mockType
+    label: Task type to mock
+    description: "The type of task to replace, for example \"deploy.Deploy\". Tasks\
+      \ of this types will be replaced with a mock script that sets the output values\
+      \ based on a previous actual release."
+    value: deploy.Deploy
+  scriptUsername: admin
+  scriptUserPassword: !value "xlrelease_Release_Test_Runner_for_Templates_scriptUserPassword"
+  riskProfile: Default risk profile
+  author: admin
